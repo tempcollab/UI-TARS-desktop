@@ -35,9 +35,23 @@ if [ -d /tmp/workspace-evil ]; then
   echo "  Removed /tmp/workspace-evil"
 fi
 
+# --- Clean up agent server PIDs ---
+AGENT_PID_FILE="/tmp/autofyn_audit_agent_pids.txt"
+if [ -f "${AGENT_PID_FILE}" ]; then
+  echo "Cleaning up agent server PIDs..."
+  while IFS= read -r pid; do
+    if [ -n "${pid}" ] && kill -0 "${pid}" 2>/dev/null; then
+      echo "  Stopping agent server PID ${pid}"
+      kill "${pid}" 2>/dev/null || true
+    fi
+  done < "${AGENT_PID_FILE}"
+  rm -f "${AGENT_PID_FILE}"
+  echo "  Agent PID file removed"
+fi
+
 # --- Clean up log files ---
 echo "Cleaning up log files..."
-rm -f /tmp/mcp_commands.log /tmp/mcp_filesystem.log
+rm -f /tmp/mcp_commands.log /tmp/mcp_filesystem.log /tmp/autofyn_audit_agent.log
 echo "  Removed server log files"
 
 echo ""

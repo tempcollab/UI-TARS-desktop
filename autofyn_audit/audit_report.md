@@ -1709,7 +1709,6 @@ if (BLOCKED_HOSTS.some(h => parsed.hostname === h) || parsed.protocol !== 'https
 
 **Affected Component:**  
 `multimodal/tarko/shared-utils/src/deepMerge.ts:48-64`  
-`multimodal/tarko/agent-ui-builder/src/builder.ts:51,56,118`  
 `multimodal/tarko/agent-cli/src/config/loader.ts:159`
 
 **Description:**  
@@ -1733,7 +1732,7 @@ deepMerge({}, malicious);
 console.log({}.polluted);  // "yes" - prototype polluted
 ```
 
-**Evidence:** `for...in` loop present with no `__proto__` / `constructor` guard. `deepMerge` called in `builder.ts` with `AgentWebUIImplementation` data and in `loader.ts` with user-controlled config files.
+**Evidence:** `for...in` loop present with no `__proto__` / `constructor` guard. `deepMerge` called in `loader.ts:159` with user-controlled config files.
 
 **Impact:**
 - Pollute `Object.prototype` properties globally in Node.js process
