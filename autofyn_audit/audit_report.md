@@ -743,10 +743,34 @@ autofyn_audit/
 │
 │   # Round 5: XSS, SSE CORS, Stack Trace, Log Injection, Config Override
 ├── exploit_21_stored_xss_filename.sh         # Stored XSS via unsanitized filenames
-├── exploit_22_sse_cors_next.sh               # SSE CORS bypass in agent-server-next
+├── exploit_22_browser_config_poisoning.sh    # Browser config poisoning via HTTP headers
 ├── exploit_23_stack_trace_exposure.sh        # Full stack trace in error API responses
 ├── exploit_24_log_injection.sh               # Log injection via user-controlled sessionId
-└── exploit_25_agent_config_override.sh       # Unauthenticated agentOptions override at session create
+├── exploit_25_agent_config_override.sh       # Unauthenticated agentOptions override at session create
+│
+│   # Exploit Chains (Rounds 6-9)
+└── exploit_chains/
+    ├── run_chains.sh                         # Runner for all 20 chains
+    ├── chain_A_remote_api_key_theft.sh       # VULN-04+01+03
+    ├── chain_B_cross_user_key_theft.sh       # VULN-07+12
+    ├── chain_C_full_llm_hijack.sh            # VULN-25+08
+    ├── chain_D_session_prompt_poisoning.sh   # VULN-06+14
+    ├── chain_E_rce_to_file_read.sh           # VULN-01+20
+    ├── chain_F_cors_session_theft.sh         # VULN-13+06
+    ├── chain_G_stored_xss_csrf_amplification.sh  # VULN-21+18
+    ├── chain_H_ssrf_via_runtime_settings.sh  # VULN-11+16
+    ├── chain_I_prefix_collision_cred_read.sh # VULN-02+04
+    ├── chain_J_session_enum_workspace_escape.sh  # VULN-19+06
+    ├── chain_K_prototype_pollution_privesc.sh    # VULN-17+07+12
+    ├── chain_L_full_rce_lifecycle.sh         # VULN-04+05+01+03
+    ├── chain_M_recon_targeted_attack.sh      # VULN-23+24+06
+    ├── chain_N_amplified_dos_cascade.sh      # VULN-15+25+08
+    ├── chain_O_browser_session_theft.sh      # VULN-22+13+06
+    ├── chain_P_multitenant_workspace_takeover.sh  # 5 vulns
+    ├── chain_Q_cross_origin_persistent_rce.sh     # 6 vulns
+    ├── chain_R_prompt_driven_credential_theft.sh  # 5 vulns
+    ├── chain_S_targeted_ssrf_via_recon.sh    # 5 vulns
+    └── chain_T_browser_pollution_cascade.sh  # 5 vulns
 ```
 
 ---
