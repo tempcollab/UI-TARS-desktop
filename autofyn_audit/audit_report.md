@@ -3,18 +3,36 @@
 **Audit Date:** 2026-05-11  
 **Audited Commit:** 7986f5aea500c4535c0e55dc5c5d0cda73767c45  
 **Auditor:** AutoFyn Security Audit  
-**Result:** 25 Critical Vulnerabilities Confirmed Against Live Instance
+**Result:** 45 Confirmed Security Findings (25 Individual Vulnerabilities + 20 Exploit Chains)
+
+---
+
+## Audit Summary
+
+| Field | Value |
+|-------|-------|
+| Audit Date | 2026-05-11 to 2026-05-12 |
+| Audited Commit | 7986f5aea500c4535c0e55dc5c5d0cda73767c45 |
+| Auditor | AutoFyn Security Audit |
+| Scope | MCP Servers, Agent Server, Browser Operator, Agent Server Next |
+| Methodology | Black-box penetration testing with source code review |
+| Tools | curl, jq, static analysis (grep), live instance testing |
+| Total Findings | 45 (25 individual vulnerabilities + 20 exploit chains) |
+| Critical Severity | 4 vulnerabilities (CVSS 9.0+) |
+| High Severity | 18 vulnerabilities (CVSS 7.0-8.9) |
+| Medium Severity | 3 vulnerabilities (CVSS 4.0-6.9) |
 
 ---
 
 ## Executive Summary
 
-Agent TARS is a multimodal AI agent framework that provides MCP (Model Context Protocol) servers for command execution, filesystem access, and browser automation, plus an agent server for LLM orchestration. This security audit identified **25 critical vulnerabilities** that were confirmed against live instances.
+Agent TARS is a multimodal AI agent framework that provides MCP (Model Context Protocol) servers for command execution, filesystem access, and browser automation, plus an agent server for LLM orchestration. This security audit identified **25 individual vulnerabilities** confirmed against live instances, plus **20 exploit chains** (A-T) demonstrating how those vulnerabilities combine into irrefutable end-to-end attacks — **45 total confirmed security findings**.
 
 The most severe findings are:
 - MCP servers expose powerful capabilities (arbitrary command execution, filesystem access) over HTTP with **zero authentication**
 - Agent server allows **session hijacking** and **authentication bypass** via unsigned headers
 - Browser operator has **no SSRF protection** and **DOM XSS** via unsanitized LLM content
+- All 20 exploit chains require **zero authentication** — individual fixes are insufficient without systemic changes
 
 **Key Findings:**
 
@@ -52,6 +70,31 @@ The most severe findings are:
 23. **Stack Trace Exposure** - Error responses include full stack with file paths and line numbers
 24. **Log Injection** - sessionId interpolated into console.error without sanitization (self-documented FIXME)
 25. **Agent Config Override** - agentOptions spread with highest precedence, no schema validation
+
+---
+
+## CVSS Severity Rankings
+
+Actual CVSS scores extracted from each vulnerability section:
+
+| Severity | Count | CVSS Range | Vulnerabilities |
+|----------|-------|------------|-----------------|
+| Critical (9.0-10.0) | 4 | 9.1-10.0 | VULN-01 (10.0), VULN-04 (9.8), VULN-07 (9.1), VULN-12 (9.1) |
+| High (7.0-8.9) | 18 | 7.1-8.6 | VULN-02 (8.6), VULN-03 (7.5), VULN-05 (7.5), VULN-06 (8.1), VULN-08 (7.5), VULN-09 (7.5), VULN-10 (7.1), VULN-11 (7.5), VULN-13 (7.5), VULN-14 (8.0), VULN-15 (7.5), VULN-16 (8.6), VULN-17 (7.5), VULN-19 (7.5), VULN-20 (7.5), VULN-21 (8.2), VULN-22 (7.5), VULN-25 (8.1) |
+| Medium (4.0-6.9) | 3 | 5.3-6.8 | VULN-18 (6.8), VULN-23 (5.3), VULN-24 (5.3) |
+
+---
+
+## Remediation Priority Matrix
+
+Prioritized by CVSS score, exploitability, and role in exploit chains:
+
+| Priority | Vulnerabilities | Rationale | Timeline |
+|----------|-----------------|-----------|----------|
+| P0 - Immediate | VULN-01, VULN-04, VULN-07, VULN-12 | CVSS 9.1-10.0; used as entry points in 10+ chains; trivially exploitable with no auth | 24-48 hours |
+| P1 - Urgent | VULN-02, VULN-06, VULN-14, VULN-16, VULN-25 | CVSS 7.5-8.6; used in 5+ chains; enablers of SSRF, session hijack, and LLM control | 1 week |
+| P2 - Important | VULN-03, VULN-05, VULN-08, VULN-09, VULN-10, VULN-11, VULN-13, VULN-15, VULN-17, VULN-19, VULN-20, VULN-21, VULN-22 | CVSS 7.1-8.2; complete or amplify chain attacks | 2 weeks |
+| P3 - Scheduled | VULN-18, VULN-23, VULN-24 | CVSS 5.3-6.8; lower direct impact but used in recon and amplification chains | 30 days |
 
 ---
 
@@ -1488,6 +1531,37 @@ Five mega-chains (P-T) demonstrate that multiple independently confirmed vulnera
 - **Live**: /api/v1/user returns plaintext apiKey field in config response for forged identity
 
 **Business Impact:** Browser attack surface (config poisoning and SSRF) cascades through process-wide prototype pollution to complete identity forgery and credential theft. An attacker controlling the browser MCP server can ultimately steal API keys for any user in the system.
+
+---
+
+## Systemic Recommendations
+
+The 20 exploit chains confirm that the root causes are architectural, not individual bugs. Patching one vulnerability does not prevent an attacker from reaching the same objective via a different chain. The following systemic changes address root causes.
+
+### Authentication Architecture
+- Deploy authentication on ALL HTTP endpoints (MCP servers currently have zero auth)
+- Use signed JWTs for X-User-Info instead of plain JSON
+- Implement session ownership validation on all session-scoped operations
+
+### Input Validation Architecture
+- Add Zod/Joi schemas for ALL request bodies (agentOptions, runtimeSettings, params)
+- Implement SSRF blocklists for ANY URL-accepting parameter (remoteUrl, navigate targets)
+- Validate sessionId format at boundary (alphanumeric only, no newlines)
+
+### Rate Limiting
+- Add rate limiting middleware to agent server routes
+- Per-IP limits on session creation (prevent DoS amplification)
+- Per-session limits on query execution
+
+### Browser Security
+- Enable Chromium sandbox and site isolation
+- Add URL blocklist for internal IPs (169.254.x.x, 127.x.x.x, 10.x.x.x)
+- Isolate browser config per-request (not global singleton)
+
+### Output Sanitization
+- HTML-escape ALL user-controlled values before HTML interpolation
+- Sanitize tool results before LLM context injection
+- Remove stack traces from production error responses
 
 ---
 
