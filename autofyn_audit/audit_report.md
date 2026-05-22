@@ -2,7 +2,7 @@
 
 **Audit Firm:** AutoFyn SignalPilot
 
-**Audit Model:** OpenAI Codex
+**Audit Model:** AutoFyn Security Audit
 
 **Target:** Agent TARS / UI-TARS Desktop
 
@@ -257,6 +257,7 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 2. The requested path is outside the allowed directory but shares its string prefix.
 3. `startsWith()` containment accepts the sibling path.
 4. The filesystem server returns the sibling file content.
+5. The target sibling file or parent path must exist; requests for non-existent sibling parents can be stopped by the later parent-directory validation.
 
 **Confirmed output:**
 ```
@@ -290,7 +291,7 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 
 **Attack flow:**
 1. `deepMerge()` accepts prototype-related keys without an explicit guard.
-2. Default behavior can alter the returned object's prototype.
+2. Default behavior can alter the returned object's prototype with attacker-controlled generic properties.
 3. Separately, `X-User-Info` identity forgery is live-confirmed.
 4. User config responses return unredacted API-key fields when a config exists.
 5. A process-wide authorization bypass was not validated for default call sites.
@@ -351,12 +352,14 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 2. Arbitrary `agentOptions` are accepted at session creation.
 3. LLM params can override model request fields.
 4. In a production LLM-connected deployment, these issues can amplify cost/resource consumption.
+5. The corrected concrete estimate from tested/default limits is approximately **50,000 potential agent iterations**: 50 sessions x 1,000 default maximum iterations. Higher `maxIterations` impact requires proving the requested override is honored by the runtime.
 
 **Confirmed output:**
 ```
 [PASS] high-volume session creation received no 429 responses
 [PASS] unvalidated config accepted
 [PASS] params override confirmed by source review
+[INFO] corrected estimate: 50 sessions x 1,000 default iterations = ~50,000 potential iterations
 ```
 
 ### Chain O: Browser-Based Session Exposure Scenario (ATARS-022 + ATARS-013 + ATARS-006)
@@ -470,8 +473,9 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 1. Browser MCP server stores config in module-level singleton state.
 2. Attacker-controlled headers can affect shared browser config in the same process.
 3. Browser navigation lacks an internal-address blocklist.
-4. `deepMerge()` handles prototype keys unsafely.
-5. Identity forgery and unredacted config exposure can expose stored keys when a config exists.
+4. Separately, `deepMerge()` handles prototype keys unsafely.
+5. Separately, identity forgery and unredacted config exposure can expose stored keys when a config exists.
+6. This is a set of related browser/config/identity weaknesses, not a proven browser-to-prototype-pollution causal exploit path.
 
 **Confirmed output:**
 ```
@@ -526,7 +530,7 @@ Require authentication before tool access. Replace `exec()` with `execFile()` an
 
 #### Description
 
-The filesystem server checks path containment with `startsWith(dir)`. A sibling path such as `/private/tmp/workspace-evil` passes when the allowed directory is `/private/tmp/workspace`.
+The filesystem server checks path containment with `startsWith(dir)`. A sibling path such as `/private/tmp/workspace-evil` passes when the allowed directory is `/private/tmp/workspace`. The later realpath check also uses `startsWith(dir)`, so an existing sibling-prefix target remains reachable. Requests for non-existent sibling parents can fail at the parent-directory check.
 
 #### Vulnerable Code
 
@@ -806,7 +810,7 @@ Validate schemes, hostnames, resolved IP addresses, redirects, and private netwo
 
 #### Description
 
-`deepMerge()` iterates user-controlled keys with `for...in` and lacks explicit guards for `__proto__`, `constructor`, and `prototype`. Default behavior can alter the returned object's prototype. Global `Object.prototype` pollution was reproduced only with `nonDestructive:false`; default production impact requires a validated call path.
+`deepMerge()` iterates user-controlled keys with `for...in` and lacks explicit guards for `__proto__`, `constructor`, and `prototype`. Default behavior can alter the returned object's prototype with attacker-controlled generic properties. Global `Object.prototype` pollution was reproduced only with `nonDestructive:false`; default production impact requires a validated call path. No authorization bypass was found in the audited codebase.
 
 #### Remediation
 
