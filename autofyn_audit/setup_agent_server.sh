@@ -56,8 +56,14 @@ if [ ! -f "${AGENT_SERVER_DIST}" ] || [ ! -f "${OMNI_AGENT_DIST}" ]; then
   npx pnpm@9.10.0 --filter "./tarko/**" build 2>&1 | grep -E "Done|Failed|ERR_PNPM" | head -30 || true
   # Build gui-agent packages (required by omni-tars/gui-agent)
   npx pnpm@9.10.0 --filter "@gui-agent/*" build 2>&1 | grep -E "Done|Failed|ERR_PNPM" | head -10 || true
-  # Build omni-tars packages (the agent implementation)
-  npx pnpm@9.10.0 --filter "@omni-tars/core" --filter "@omni-tars/gui-agent" --filter "@omni-tars/agent" build 2>&1 | grep -E "Done|Failed|ERR_PNPM" | head -10 || true
+  # Build omni-tars packages (the agent implementation and runtime plugins)
+  npx pnpm@9.10.0 \
+    --filter "@omni-tars/core" \
+    --filter "@omni-tars/gui-agent" \
+    --filter "@omni-tars/code-agent" \
+    --filter "@omni-tars/mcp-agent" \
+    --filter "@omni-tars/agent" \
+    build 2>&1 | grep -E "Done|Failed|ERR_PNPM" | head -20 || true
 
   if [ ! -f "${AGENT_SERVER_DIST}" ]; then
     echo "ERROR: agent-server-next build failed - dist/index.js not found"
