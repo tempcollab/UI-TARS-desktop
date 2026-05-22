@@ -2,7 +2,7 @@
 
 **Audit Firm:** AutoFyn SignalPilot
 
-**Audit Model:** Claude Opus 4.5
+**Audit Model:** Claude Opus 4.5 (Anthropic)
 
 **Target:** Agent TARS / UI-TARS Desktop
 
@@ -97,8 +97,8 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 
 ### Chain A: Remote Environment Exposure (ATARS-004 + ATARS-001 + ATARS-003)
 
-**Severity:** Critical (CVSS 10.0)  
-**Exploit:** `autofyn_audit/exploit_chains/chain_A_remote_api_key_theft.sh`  
+**Severity:** Critical (CVSS 10.0)
+**Exploit:** `autofyn_audit/exploit_chains/chain_A_remote_api_key_theft.sh`
 **Evidence:** Direct Agent TARS Exploit
 
 **Attack flow:**
@@ -117,8 +117,8 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 
 ### Chain B: Cross-User Config Exposure (ATARS-007 + ATARS-012)
 
-**Severity:** Critical (CVSS 9.1)  
-**Exploit:** `autofyn_audit/exploit_chains/chain_B_cross_user_key_theft.sh`  
+**Severity:** Critical (CVSS 9.1)
+**Exploit:** `autofyn_audit/exploit_chains/chain_B_cross_user_key_theft.sh`
 **Evidence:** Direct Agent TARS Exploit + Source Review
 
 **Attack flow:**
@@ -136,8 +136,8 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 
 ### Chain C: LLM Parameter Override (ATARS-025 + ATARS-008)
 
-**Severity:** High (CVSS 8.1)  
-**Exploit:** `autofyn_audit/exploit_chains/chain_C_full_llm_hijack.sh`  
+**Severity:** High (CVSS 8.1)
+**Exploit:** `autofyn_audit/exploit_chains/chain_C_full_llm_hijack.sh`
 **Evidence:** Direct Agent TARS Exploit + Source Review
 
 **Attack flow:**
@@ -156,8 +156,8 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 
 ### Chain D: Session Injection + Prompt Poisoning (ATARS-006 + ATARS-014)
 
-**Severity:** High (CVSS 8.1)  
-**Exploit:** `autofyn_audit/exploit_chains/chain_D_session_prompt_poisoning.sh`  
+**Severity:** High (CVSS 8.1)
+**Exploit:** `autofyn_audit/exploit_chains/chain_D_session_prompt_poisoning.sh`
 **Evidence:** Direct Agent TARS Exploit + Source Review
 
 **Attack flow:**
@@ -175,8 +175,8 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 
 ### Chain E: RCE to Workspace File Read Scenario (ATARS-001 + ATARS-020)
 
-**Severity:** High (CVSS 8.0)  
-**Exploit:** `autofyn_audit/exploit_chains/chain_E_rce_to_file_read.sh`  
+**Severity:** High (CVSS 8.0)
+**Exploit:** `autofyn_audit/exploit_chains/chain_E_rce_to_file_read.sh`
 **Evidence:** Direct Agent TARS Exploit + Source Review
 
 **Attack flow:**
@@ -193,8 +193,8 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 
 ### Chain F: CORS Session Exposure Risk (ATARS-013 + ATARS-006)
 
-**Severity:** High (CVSS 7.5)  
-**Exploit:** `autofyn_audit/exploit_chains/chain_F_cors_session_theft.sh`  
+**Severity:** High (CVSS 7.5)
+**Exploit:** `autofyn_audit/exploit_chains/chain_F_cors_session_theft.sh`
 **Evidence:** Source-Confirmed / Partial Live
 
 **Attack flow:**
@@ -211,8 +211,8 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 
 ### Chain G: Stored XSS + CSRF Replay (ATARS-021 + ATARS-018)
 
-**Severity:** High (CVSS 8.2)  
-**Exploit:** `autofyn_audit/exploit_chains/chain_G_stored_xss_csrf_amplification.sh`  
+**Severity:** High (CVSS 8.2)
+**Exploit:** `autofyn_audit/exploit_chains/chain_G_stored_xss_csrf_amplification.sh`
 **Evidence:** Direct Agent TARS Exploit + Source Review
 
 **Attack flow:**
@@ -230,8 +230,8 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 
 ### Chain H: Runtime Settings to SSRF Scenario (ATARS-011 + ATARS-016)
 
-**Severity:** High (CVSS 8.6)  
-**Exploit:** `autofyn_audit/exploit_chains/chain_H_ssrf_via_runtime_settings.sh`  
+**Severity:** High (CVSS 8.6)
+**Exploit:** `autofyn_audit/exploit_chains/chain_H_ssrf_via_runtime_settings.sh`
 **Evidence:** Direct Agent TARS Exploit + Source Review
 
 **Attack flow:**
@@ -248,8 +248,8 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 
 ### Chain I: Prefix Collision Credential Read (ATARS-002 + ATARS-004)
 
-**Severity:** High (CVSS 8.6)  
-**Exploit:** `autofyn_audit/exploit_chains/chain_I_prefix_collision_cred_read.sh`  
+**Severity:** High (CVSS 8.6)
+**Exploit:** `autofyn_audit/exploit_chains/chain_I_prefix_collision_cred_read.sh`
 **Evidence:** Source-Confirmed / Partial Live
 
 **Attack flow:**
@@ -267,8 +267,8 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 
 ### Chain J: Session Enumeration + Workspace IDOR (ATARS-006 + ATARS-019)
 
-**Severity:** High (CVSS 7.5)  
-**Exploit:** `autofyn_audit/exploit_chains/chain_J_session_enum_workspace_escape.sh`  
+**Severity:** High (CVSS 7.5)
+**Exploit:** `autofyn_audit/exploit_chains/chain_J_session_enum_workspace_escape.sh`
 **Evidence:** Direct Agent TARS Exploit + Source Review
 
 **Attack flow:**
@@ -285,8 +285,8 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 
 ### Chain K: Prototype-Key Handling + Identity/Config Exposure (ATARS-017 + ATARS-007 + ATARS-012)
 
-**Severity:** High (CVSS 7.5)  
-**Exploit:** `autofyn_audit/exploit_chains/chain_K_prototype_pollution_privesc.sh`  
+**Severity:** High (CVSS 7.5)
+**Exploit:** `autofyn_audit/exploit_chains/chain_K_prototype_pollution_privesc.sh`
 **Evidence:** Source-Confirmed / Partial Live
 
 **Attack flow:**
@@ -305,8 +305,8 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 
 ### Chain L: No-Auth RCE and Environment Exposure (ATARS-004 + ATARS-005 + ATARS-001 + ATARS-003)
 
-**Severity:** Critical (CVSS 10.0)  
-**Exploit:** `autofyn_audit/exploit_chains/chain_L_full_rce_lifecycle.sh`  
+**Severity:** Critical (CVSS 10.0)
+**Exploit:** `autofyn_audit/exploit_chains/chain_L_full_rce_lifecycle.sh`
 **Evidence:** Direct Agent TARS Exploit
 
 **Attack flow:**
@@ -325,8 +325,8 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 
 ### Chain M: Reconnaissance + Targeted Session Attack (ATARS-023 + ATARS-024 + ATARS-006)
 
-**Severity:** High (CVSS 8.1)  
-**Exploit:** `autofyn_audit/exploit_chains/chain_M_recon_targeted_attack.sh`  
+**Severity:** High (CVSS 8.1)
+**Exploit:** `autofyn_audit/exploit_chains/chain_M_recon_targeted_attack.sh`
 **Evidence:** Direct Agent TARS Exploit + Source Review
 
 **Attack flow:**
@@ -343,8 +343,8 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 
 ### Chain N: Amplified DoS via Config Cascade (ATARS-015 + ATARS-025 + ATARS-008)
 
-**Severity:** High (CVSS 8.1)  
-**Exploit:** `autofyn_audit/exploit_chains/chain_N_amplified_dos_cascade.sh`  
+**Severity:** High (CVSS 8.1)
+**Exploit:** `autofyn_audit/exploit_chains/chain_N_amplified_dos_cascade.sh`
 **Evidence:** Direct Agent TARS Exploit + Source Review
 
 **Attack flow:**
@@ -364,8 +364,8 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 
 ### Chain O: Browser-Based Session Exposure Scenario (ATARS-022 + ATARS-013 + ATARS-006)
 
-**Severity:** High (CVSS 7.5)  
-**Exploit:** `autofyn_audit/exploit_chains/chain_O_browser_session_theft.sh`  
+**Severity:** High (CVSS 7.5)
+**Exploit:** `autofyn_audit/exploit_chains/chain_O_browser_session_theft.sh`
 **Evidence:** Source-Confirmed / Partial Live
 
 **Attack flow:**
@@ -383,8 +383,8 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 
 ### Chain P: Multi-Tenant Workspace Takeover Scenario (ATARS-019 + ATARS-006 + ATARS-021 + ATARS-018 + ATARS-015)
 
-**Severity:** High (CVSS 8.2)  
-**Exploit:** `autofyn_audit/exploit_chains/chain_P_multitenant_workspace_takeover.sh`  
+**Severity:** High (CVSS 8.2)
+**Exploit:** `autofyn_audit/exploit_chains/chain_P_multitenant_workspace_takeover.sh`
 **Evidence:** Direct Agent TARS Exploit + Source Review
 
 **Attack flow:**
@@ -402,8 +402,8 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 
 ### Chain Q: Cross-Origin Persistent-Control Scenario (ATARS-013 + ATARS-006 + ATARS-001 + ATARS-021 + ATARS-018 + ATARS-015)
 
-**Severity:** High (CVSS 8.2)  
-**Exploit:** `autofyn_audit/exploit_chains/chain_Q_cross_origin_persistent_rce.sh`  
+**Severity:** High (CVSS 8.2)
+**Exploit:** `autofyn_audit/exploit_chains/chain_Q_cross_origin_persistent_rce.sh`
 **Evidence:** Direct Agent TARS Exploit + Source Review
 
 **Attack flow:**
@@ -424,8 +424,8 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 
 ### Chain R: Prompt-Driven Credential Exposure Scenario (ATARS-014 + ATARS-001 + ATARS-003 + ATARS-012 + ATARS-024)
 
-**Severity:** High (CVSS 8.0)  
-**Exploit:** `autofyn_audit/exploit_chains/chain_R_prompt_driven_credential_theft.sh`  
+**Severity:** High (CVSS 8.0)
+**Exploit:** `autofyn_audit/exploit_chains/chain_R_prompt_driven_credential_theft.sh`
 **Evidence:** Direct Agent TARS Exploit + Source Review
 
 **Attack flow:**
@@ -444,8 +444,8 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 
 ### Chain S: Targeted SSRF via Reconnaissance (ATARS-023 + ATARS-011 + ATARS-016 + ATARS-002 + ATARS-020)
 
-**Severity:** High (CVSS 8.6)  
-**Exploit:** `autofyn_audit/exploit_chains/chain_S_targeted_ssrf_via_recon.sh`  
+**Severity:** High (CVSS 8.6)
+**Exploit:** `autofyn_audit/exploit_chains/chain_S_targeted_ssrf_via_recon.sh`
 **Evidence:** Direct Agent TARS Exploit + Source Review
 
 **Attack flow:**
@@ -465,8 +465,8 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 
 ### Chain T: Browser Pollution Cascade (ATARS-022 + ATARS-009 + ATARS-017 + ATARS-007 + ATARS-012)
 
-**Severity:** High (CVSS 8.6)  
-**Exploit:** `autofyn_audit/exploit_chains/chain_T_browser_pollution_cascade.sh`  
+**Severity:** High (CVSS 8.6)
+**Exploit:** `autofyn_audit/exploit_chains/chain_T_browser_pollution_cascade.sh`
 **Evidence:** Source-Confirmed / Partial Live
 
 **Attack flow:**
@@ -491,8 +491,8 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 
 ### ATARS-001: MCP Command Injection via `run_command`
 
-**Severity:** Critical (CVSS 10.0)  
-**CWE:** CWE-78, CWE-306  
+**Severity:** Critical (CVSS 10.0)
+**CWE:** CWE-78, CWE-306
 **Affected Code:** `packages/agent-infra/mcp-servers/commands/src/server.ts:143`
 
 #### Description
@@ -524,8 +524,8 @@ Require authentication before tool access. Replace `exec()` with `execFile()` an
 
 ### ATARS-002: Filesystem Path Prefix Collision
 
-**Severity:** High (CVSS 8.6)  
-**CWE:** CWE-22  
+**Severity:** High (CVSS 8.6)
+**CWE:** CWE-22
 **Affected Code:** `packages/agent-infra/mcp-servers/filesystem/src/server.ts:75-77`
 
 #### Description
@@ -557,8 +557,8 @@ Check `requested === dir || requested.startsWith(dir + path.sep)`, or use `path.
 
 ### ATARS-003: Environment Variable Exposure via Child Process
 
-**Severity:** High (CVSS 7.5)  
-**CWE:** CWE-200  
+**Severity:** High (CVSS 7.5)
+**CWE:** CWE-200
 **Affected Code:** `packages/agent-infra/mcp-servers/commands/src/server.ts:143`
 
 #### Description
@@ -584,8 +584,8 @@ Pass a minimal explicit `env` to child processes and avoid placing long-lived se
 
 ### ATARS-004: Missing Authentication on MCP HTTP Endpoints
 
-**Severity:** Critical (CVSS 9.8)  
-**CWE:** CWE-306  
+**Severity:** Critical (CVSS 9.8)
+**CWE:** CWE-306
 **Affected Code:** `packages/agent-infra/mcp-http-server/src/startServer.ts:115-117`
 
 #### Description
@@ -607,8 +607,8 @@ Require bearer-token authentication or mTLS for all MCP HTTP transports. Bind to
 
 ### ATARS-005: Arbitrary `cwd` for Command Execution
 
-**Severity:** High (CVSS 7.5)  
-**CWE:** CWE-22  
+**Severity:** High (CVSS 7.5)
+**CWE:** CWE-22
 **Affected Code:** `packages/agent-infra/mcp-servers/commands/src/server.ts:137-140`
 
 #### Description
@@ -630,8 +630,8 @@ Restrict `cwd` to an approved workspace root using canonical paths and reject ab
 
 ### ATARS-006: Session Hijacking in Single-Tenant Mode
 
-**Severity:** High (CVSS 8.1)  
-**CWE:** CWE-306  
+**Severity:** High (CVSS 8.1)
+**CWE:** CWE-306
 **Affected Code:** `agent-server-next/src/middlewares/auth.ts:32-35`, `controllers/sessions.ts`
 
 #### Description
@@ -648,8 +648,8 @@ Enable authentication by default. Bind every session to an authenticated princip
 
 ### ATARS-007: `X-User-Info` Identity Forgery
 
-**Severity:** Critical (CVSS 9.1)  
-**CWE:** CWE-287, CWE-290  
+**Severity:** Critical (CVSS 9.1)
+**CWE:** CWE-287, CWE-290
 **Affected Code:** `agent-server-next/src/middlewares/auth.ts:40-42`
 
 #### Description
@@ -678,8 +678,8 @@ Accept identities only from a trusted, signed token or verified upstream proxy. 
 
 ### ATARS-008: LLM Params Override Bypass
 
-**Severity:** High (CVSS 7.5)  
-**CWE:** CWE-20  
+**Severity:** High (CVSS 7.5)
+**CWE:** CWE-20
 **Affected Code:** `model-provider/src/llm-client.ts:65-71`
 
 #### Description
@@ -692,8 +692,8 @@ Replace free-form params with a strict allowlist. Never spread untrusted configu
 
 ### ATARS-009: Browser SSRF via Navigate Action
 
-**Severity:** High (CVSS 7.5)  
-**CWE:** CWE-918  
+**Severity:** High (CVSS 7.5)
+**CWE:** CWE-918
 **Affected Code:** `browser-operator/src/browser-operator.ts` (handleNavigate method)
 
 #### Description
@@ -706,8 +706,8 @@ Block localhost, RFC1918, link-local, and cloud metadata ranges before `page.got
 
 ### ATARS-010: Browser XSS via `innerHTML`
 
-**Severity:** High (CVSS 7.1)  
-**CWE:** CWE-79  
+**Severity:** High (CVSS 7.1)
+**CWE:** CWE-79
 **Affected Code:** `browser-operator/src/ui-helper.ts` (showActionInfo method)
 
 #### Description
@@ -720,8 +720,8 @@ Use `textContent` for plain text or sanitize with DOMPurify before assigning HTM
 
 ### ATARS-011: Runtime Settings Injection
 
-**Severity:** High (CVSS 7.5)  
-**CWE:** CWE-20  
+**Severity:** High (CVSS 7.5)
+**CWE:** CWE-20
 **Affected Code:** `agent-server-next/src/services/session/AgentSession.ts:191-197`
 
 #### Description
@@ -734,8 +734,8 @@ Validate runtime settings with a schema and reject unknown fields. Avoid spreadi
 
 ### ATARS-012: Plaintext API Key Exposure in User Config
 
-**Severity:** Critical (CVSS 9.1)  
-**CWE:** CWE-200, CWE-312  
+**Severity:** Critical (CVSS 9.1)
+**CWE:** CWE-200, CWE-312
 **Affected Code:** `agent-server-next/src/controllers/user.ts:34`
 
 #### Description
@@ -748,8 +748,8 @@ Encrypt provider keys at rest. Redact or omit secrets in API responses. Fix iden
 
 ### ATARS-013: SSE Wildcard CORS Header
 
-**Severity:** High (CVSS 7.5)  
-**CWE:** CWE-942  
+**Severity:** High (CVSS 7.5)
+**CWE:** CWE-942
 **Affected Code:** `agent-server-next/src/controllers/queries.ts:187,221`
 
 #### Description
@@ -762,8 +762,8 @@ Remove hardcoded wildcard headers and enforce a centralized allowlist-based CORS
 
 ### ATARS-014: Prompt Injection via Unsanitized Tool Results
 
-**Severity:** High (CVSS 8.0)  
-**CWE:** CWE-74  
+**Severity:** High (CVSS 8.0)
+**CWE:** CWE-74
 **Affected Code:** `agent/src/agent/runner/tool-processor.ts`, `message-history.ts`
 
 #### Description
@@ -776,8 +776,8 @@ Treat tool output as untrusted data. Add explicit provenance markers, quote boun
 
 ### ATARS-015: Missing Rate Limiting
 
-**Severity:** High (CVSS 7.5)  
-**CWE:** CWE-770  
+**Severity:** High (CVSS 7.5)
+**CWE:** CWE-770
 **Affected Code:** `agent-server-next/src/routes/*`
 
 #### Description
@@ -790,8 +790,8 @@ Add per-IP, per-user, and per-session limits. Rate-limit session creation, query
 
 ### ATARS-016: SSRF via Unvalidated `webui.remoteUrl`
 
-**Severity:** High (CVSS 8.6)  
-**CWE:** CWE-918  
+**Severity:** High (CVSS 8.6)
+**CWE:** CWE-918
 **Affected Code:** `agent-ui-builder/src/builder.ts:85-97`
 
 #### Description
@@ -804,8 +804,8 @@ Validate schemes, hostnames, resolved IP addresses, redirects, and private netwo
 
 ### ATARS-017: Unsafe Prototype-Key Handling in `deepMerge`
 
-**Severity:** High (CVSS 7.5)  
-**CWE:** CWE-1321  
+**Severity:** High (CVSS 7.5)
+**CWE:** CWE-1321
 **Affected Code:** `shared-utils/src/deepMerge.ts:48-64`
 
 #### Description
@@ -818,8 +818,8 @@ Reject prototype-related keys before assignment. Use `Object.keys()` over truste
 
 ### ATARS-018: CSRF Token Replay
 
-**Severity:** Medium (CVSS 6.8)  
-**CWE:** CWE-294  
+**Severity:** Medium (CVSS 6.8)
+**CWE:** CWE-294
 **Affected Code:** `agent-server/src/api/middleware/csrf-protection.ts:34-44`
 
 #### Description
@@ -832,8 +832,8 @@ Delete CSRF tokens after successful validation and bind tokens to user/session c
 
 ### ATARS-019: Workspace File IDOR
 
-**Severity:** High (CVSS 7.5)  
-**CWE:** CWE-639  
+**Severity:** High (CVSS 7.5)
+**CWE:** CWE-639
 **Affected Code:** `agent-server/src/api/controllers/sessions.ts:432-521`
 
 #### Description
@@ -846,8 +846,8 @@ Resolve workspace access through authenticated user-session ownership. Reject se
 
 ### ATARS-020: Symlink Workspace Escape
 
-**Severity:** High (CVSS 7.5)  
-**CWE:** CWE-59  
+**Severity:** High (CVSS 7.5)
+**CWE:** CWE-59
 **Affected Code:** `agent-server/src/utils/workspace-static-server.ts:82-87`
 
 #### Description
@@ -860,8 +860,8 @@ Use `fs.realpathSync()` or equivalent canonicalization before boundary checks.
 
 ### ATARS-021: Stored XSS via Unsanitized Workspace Filenames
 
-**Severity:** High (CVSS 8.2)  
-**CWE:** CWE-79  
+**Severity:** High (CVSS 8.2)
+**CWE:** CWE-79
 **Affected Code:** `agent-server/src/utils/workspace-static-server.ts:191,218,235`
 
 #### Description
@@ -874,8 +874,8 @@ Escape all user-controlled values before HTML interpolation.
 
 ### ATARS-022: Browser Config Poisoning via Shared Singleton
 
-**Severity:** High (CVSS 7.5)  
-**CWE:** CWE-668, CWE-306  
+**Severity:** High (CVSS 7.5)
+**CWE:** CWE-668, CWE-306
 **Affected Code:** `mcp-servers/browser/src/index.ts:168-183`, `store.ts:11-41`, `server.ts:47-52`
 
 #### Description
@@ -888,8 +888,8 @@ Store browser configuration per request/session. Authenticate before accepting b
 
 ### ATARS-023: Stack Trace Exposure
 
-**Severity:** Medium (CVSS 5.3)  
-**CWE:** CWE-209  
+**Severity:** Medium (CVSS 5.3)
+**CWE:** CWE-209
 **Affected Code:** `agent-server-next/src/utils/error-handler.ts:55`
 
 #### Description
@@ -902,8 +902,8 @@ Return stack traces only in local development mode.
 
 ### ATARS-024: Log Injection via `sessionId`
 
-**Severity:** Medium (CVSS 5.3)  
-**CWE:** CWE-117  
+**Severity:** Medium (CVSS 5.3)
+**CWE:** CWE-117
 **Affected Code:** `agent-server/src/api/controllers/sessions.ts:780-785`
 
 #### Description
@@ -916,8 +916,8 @@ Use structured logging and validate `sessionId` against a strict character allow
 
 ### ATARS-025: Unvalidated `agentOptions` Override
 
-**Severity:** High (CVSS 8.1)  
-**CWE:** CWE-915  
+**Severity:** High (CVSS 8.1)
+**CWE:** CWE-915
 **Affected Code:** `agent-server-next/src/services/session/AgentSessionFactory.ts:56-61`, `AgentSession.ts:192-196`
 
 #### Description
@@ -1002,6 +1002,18 @@ autofyn_audit/
 ├── exploit_23_stack_trace_exposure.sh
 ├── exploit_24_log_injection.sh
 ├── exploit_25_agent_config_override.sh
+├── docs/
+│   ├── CVE-ATARS-001.md
+│   ├── CVE-ATARS-003.md
+│   ├── CVE-ATARS-004.md
+│   ├── CVE-ATARS-005.md
+│   ├── CVE-ATARS-006.md
+│   ├── CVE-ATARS-007.md
+│   ├── CVE-ATARS-011.md
+│   ├── CVE-ATARS-012.md
+│   ├── CVE-ATARS-013.md
+│   ├── CVE-ATARS-015.md
+│   └── CVE-ATARS-025.md
 └── exploit_chains/
     ├── chain_A_remote_api_key_theft.sh
     ├── chain_B_cross_user_key_theft.sh
@@ -1022,5 +1034,6 @@ autofyn_audit/
     ├── chain_Q_cross_origin_persistent_rce.sh
     ├── chain_R_prompt_driven_credential_theft.sh
     ├── chain_S_targeted_ssrf_via_recon.sh
-    └── chain_T_browser_pollution_cascade.sh
+    ├── chain_T_browser_pollution_cascade.sh
+    └── run_chains.sh
 ```
