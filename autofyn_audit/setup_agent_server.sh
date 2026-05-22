@@ -7,14 +7,18 @@
 #   multi-tenant (AUDIT_MULTI_TENANT=true): Auth via X-User-Info header. Forgery possible.
 set -euo pipefail
 
-REPO_DIR="/home/agentuser/repo"
-AUDIT_DIR="${REPO_DIR}/autofyn_audit"
+AUDIT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(cd "${AUDIT_DIR}/.." && pwd)"
 AGENT_PID_FILE="/tmp/autofyn_audit_agent_pids.txt"
 AGENT_PORT="${AUDIT_AGENT_PORT:-3456}"
 MULTI_TENANT="${AUDIT_MULTI_TENANT:-false}"
 PINNED_SHA="7986f5aea500c4535c0e55dc5c5d0cda73767c45"
 # Use tsx from multimodal workspace where agent-server-next deps are installed
 TSX="${REPO_DIR}/multimodal/node_modules/.bin/tsx"
+# Fallback: try npx tsx if local binary not found
+if [ ! -x "${TSX}" ]; then
+  TSX="$(command -v tsx 2>/dev/null || echo "")"
+fi
 
 echo "=== Agent TARS Security Audit - Agent Server Setup ==="
 echo "Pinned commit: ${PINNED_SHA}"

@@ -4,8 +4,8 @@
 # Requires: bash >= 4.0, node, pnpm, curl or nc
 set -euo pipefail
 
-REPO_DIR="/home/agentuser/repo"
-AUDIT_DIR="${REPO_DIR}/autofyn_audit"
+AUDIT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(cd "${AUDIT_DIR}/.." && pwd)"
 PID_FILE="/tmp/autofyn_audit_pids.txt"
 COMMANDS_PORT=8089
 FS_PORT=8090

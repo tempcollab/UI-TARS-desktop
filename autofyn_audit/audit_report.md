@@ -223,7 +223,7 @@ The 20 exploit chains confirm that root causes are architectural. The following 
 
 ### Setup
 ```bash
-cd /home/agentuser/repo/autofyn_audit
+cd <repo_root>/autofyn_audit
 ./setup.sh
 ```
 
