@@ -64,8 +64,10 @@ echo "Creating test directories..."
 mkdir -p /tmp/workspace
 mkdir -p /tmp/workspace-evil
 echo "SECRET_DATA_12345" > /tmp/workspace-evil/secret.txt
-echo "  Created /tmp/workspace (allowed directory)"
-echo "  Created /tmp/workspace-evil/secret.txt (sibling - outside allowed, prefix collision target)"
+WORKSPACE_REAL="$(cd /tmp/workspace && pwd -P)"
+WORKSPACE_EVIL_REAL="$(cd /tmp/workspace-evil && pwd -P)"
+echo "  Created ${WORKSPACE_REAL} (allowed directory)"
+echo "  Created ${WORKSPACE_EVIL_REAL}/secret.txt (sibling - outside allowed, prefix collision target)"
 
 # --- Start MCP commands server ---
 echo ""
@@ -78,7 +80,7 @@ echo "  Commands server PID: ${COMMANDS_PID}"
 
 # --- Start MCP filesystem server ---
 echo "Starting MCP filesystem server on port ${FS_PORT}..."
-node "${FS_DIST}" --port "${FS_PORT}" --allowed-directories /tmp/workspace \
+node "${FS_DIST}" --port "${FS_PORT}" --allowed-directories "${WORKSPACE_REAL}" \
   > /tmp/mcp_filesystem.log 2>&1 &
 FS_PID=$!
 echo "${FS_PID}" >> "${PID_FILE}"
