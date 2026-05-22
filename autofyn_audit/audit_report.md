@@ -2,7 +2,7 @@
 
 **Audit Firm:** AutoFyn SignalPilot
 
-**Audit Model:** AutoFyn Security Audit
+**Audit Model:** Claude Opus 4.5
 
 **Target:** Agent TARS / UI-TARS Desktop
 
