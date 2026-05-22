@@ -25,7 +25,7 @@ The strongest live-confirmed issues are:
 - **Unauthenticated remote command execution** through the MCP commands server.
 - **Unauthenticated MCP access** to command and filesystem tools.
 - **Identity forgery** through unsigned `X-User-Info` headers in multi-tenant mode.
-- **Filesystem boundary bypass** through path-prefix collision.
+- **Filesystem boundary bypass** through path-prefix collision (code-level; secondary runtime check limits direct exploitation).
 - **Session access and configuration manipulation** in the tested agent server setup.
 
 The audit also documents **20 exploit chain scenarios** showing how these issues compose into realistic attack paths. Some chains are direct live exploits; others combine live-confirmed primitives with source-confirmed browser, LLM, SSRF, XSS, or cloud-metadata legs that require deployment-specific validation before claiming full end-to-end exploitation. Those evidence levels are explicitly labeled below.
@@ -42,7 +42,7 @@ The audit also documents **20 exploit chain scenarios** showing how these issues
 | ATARS-004 | Missing Authentication on MCP HTTP Endpoints | Critical | 9.8 | Validated | Direct Agent TARS Exploit |
 | ATARS-007 | `X-User-Info` Identity Forgery | Critical | 9.1 | Validated | Direct Agent TARS Exploit |
 | ATARS-012 | Plaintext API Key Exposure in User Config | Critical | 9.1 | Validated | Direct Agent TARS Exploit + Source Review |
-| ATARS-002 | Filesystem Path Prefix Collision | High | 8.6 | Validated | Direct Agent TARS Exploit |
+| ATARS-002 | Filesystem Path Prefix Collision | High | 8.6 | Validated | Source-Confirmed / Partial Live |
 | ATARS-016 | SSRF via Unvalidated `webui.remoteUrl` | High | 8.6 | Validated | Source-Confirmed / Partial Live |
 | ATARS-021 | Stored XSS via Unsanitized Workspace Filenames | High | 8.2 | Validated | Source-Confirmed / Partial Live |
 | ATARS-006 | Session Hijacking in Single-Tenant Mode | High | 8.1 | Validated | Direct Agent TARS Exploit |
@@ -82,7 +82,7 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 | F | `chain_F_cors_session_theft.sh` | Source-Confirmed / Partial Live |
 | G | `chain_G_stored_xss_csrf_amplification.sh` | Direct Agent TARS Exploit + Source Review |
 | H | `chain_H_ssrf_via_runtime_settings.sh` | Direct Agent TARS Exploit + Source Review |
-| I | `chain_I_prefix_collision_cred_read.sh` | Direct Agent TARS Exploit |
+| I | `chain_I_prefix_collision_cred_read.sh` | Source-Confirmed / Partial Live |
 | J | `chain_J_session_enum_workspace_escape.sh` | Direct Agent TARS Exploit + Source Review |
 | K | `chain_K_prototype_pollution_privesc.sh` | Source-Confirmed / Partial Live |
 | L | `chain_L_full_rce_lifecycle.sh` | Direct Agent TARS Exploit |
@@ -250,14 +250,14 @@ The following chains combine multiple vulnerabilities into realistic attack scen
 
 **Severity:** High (CVSS 8.6)  
 **Exploit:** `autofyn_audit/exploit_chains/chain_I_prefix_collision_cred_read.sh`  
-**Evidence:** Direct Agent TARS Exploit
+**Evidence:** Source-Confirmed / Partial Live
 
 **Attack flow:**
 1. Attacker invokes the filesystem MCP server without authentication.
 2. The requested path is outside the allowed directory but shares its string prefix.
 3. `startsWith()` containment accepts the sibling path.
-4. The filesystem server returns the sibling file content.
-5. The target sibling file or parent path must exist; requests for non-existent sibling parents can be stopped by the later parent-directory validation.
+4. A secondary `realpath`-based parent-directory check can block requests when the sibling parent does not exist.
+5. When the sibling directory and file both exist on disk, the prefix collision bypasses the primary containment check.
 
 **Confirmed output:**
 ```
@@ -694,7 +694,7 @@ Replace free-form params with a strict allowlist. Never spread untrusted configu
 
 **Severity:** High (CVSS 7.5)  
 **CWE:** CWE-918  
-**Affected Code:** `browser-operator/src/browser-operator.ts:556-568`
+**Affected Code:** `browser-operator/src/browser-operator.ts` (handleNavigate method)
 
 #### Description
 
@@ -708,7 +708,7 @@ Block localhost, RFC1918, link-local, and cloud metadata ranges before `page.got
 
 **Severity:** High (CVSS 7.1)  
 **CWE:** CWE-79  
-**Affected Code:** `browser-operator/src/ui-helper.ts:328-331`
+**Affected Code:** `browser-operator/src/ui-helper.ts` (showActionInfo method)
 
 #### Description
 
